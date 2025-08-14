@@ -7,7 +7,13 @@ authors = [
     { name = "Santosh Shrestha", email = "iam@santoshsth.com.np" }
 ]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "gradio>=5.42.0",
+    "openai>=1.99.9",
+    "pypdf>=6.0.0",
+    "pypdf2>=3.0.1",
+    "python-dotenv>=1.1.1",
+]
 
 [project.scripts]
 chatbot = "chatbot:main"
