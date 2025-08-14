@@ -1,183 +1,125 @@
-# AI Chatbot
+### AI Chatbot
 
-A scalable, agentic AI chatbot built with Python, supporting multiple LLM providers (OpenAI and Google Gemini) with a clean Gradio interface.
+A small, agentic AI chatbot with a Gradio UI. It uses Google Gemini for generation and OpenRouter for automatic response evaluation, driven by simple prompts and local profile data.
 
-## 🏗️ Project Structure
+### Requirements
+
+- Python ≥ 3.13 (managed automatically by `uv`)
+- `uv` package manager (for dependency management, virtualenvs and builds)
+
+### Install uv (macOS/Linux)
+
+You can install `uv` in either of the following ways:
+
+```bash
+# Recommended one-line installer
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Or via Homebrew (macOS)
+brew install uv
+
+# Verify
+uv --version
+```
+
+The installer will add `uv` to your PATH. If the command isn’t found after installation, restart your shell.
+
+### Project Structure
 
 ```
 chatbot/
+├── bio/
+│   ├── Profile.pdf            # Your resume/profile (parsed at runtime)
+│   └── self_intro.txt         # A short personal summary
 ├── src/chatbot/
+│   ├── __init__.py            # Main entry; launches Gradio UI
 │   ├── core/
-│   │   └── config.py          # Configuration management
-│   ├── llm/
-│   │   ├── base.py            # Abstract LLM interface
-│   │   ├── openai_provider.py # OpenAI implementation
-│   │   └── gemini_provider.py # Google Gemini implementation
-│   ├── agent.py               # Simple chat agent
-│   ├── factory.py             # LLM provider factory
-│   ├── ui.py                  # Gradio interface
-│   └── __init__.py            # Main entry point
-├── example.py                 # Command-line example
-├── env_example.txt            # Environment variables template
-├── pyproject.toml             # Project dependencies
+│   │   └── config.py          # Env-driven configuration
+│   ├── fileParser/
+│   │   └── parser.py          # PDF and text parsing helpers
+│   ├── services/
+│   │   ├── ChatService.py     # Chat orchestration with Gemini
+│   │   ├── EvaluatorService.py# Quality evaluation via OpenRouter
+│   │   └── UserProfileService.py # Loads content from bio/
+│   └── utils/
+│       └── prompt.py          # System/evaluator prompt builders
+├── .env.example            # Example environment file
+├── pyproject.toml             # Project metadata and dependencies
 └── README.md                  # This file
 ```
 
-## 🚀 Features
+### Setup
 
-- **Multiple LLM Providers**: Support for OpenAI and Google Gemini
-- **Clean Architecture**: Follows SOLID principles with clear separation of concerns
-- **Extensible Design**: Easy to add new LLM providers or agents
-- **Modern UI**: Beautiful Gradio-based chat interface
-- **Simple Configuration**: Environment-based configuration
-- **Type Safety**: Full type hints throughout
-
-## 📦 Installation
-
-1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd chatbot
-```
+# 1) Clone & enter the project
+git clone git@github.com:SantoshShresthaa/AgenticAI-chatbot.git
 
-2. Install dependencies:
-```bash
+cd AgenticAI-chatbot
+
+# 2) Install dependencies (creates a virtualenv automatically)
 uv sync
-# or
-pip install -e .
+
+# 3) Create your .env from the example and edit values
+cp .env.example .env
 ```
 
-3. Set up environment variables:
-```bash
-cp env_example.txt .env
-# Edit .env with your API keys
-```
+### Environment Variables
 
-## 🔧 Configuration
-
-Create a `.env` file with your API keys:
+The app reads configuration from `.env` via `src/chatbot/core/config.py`. Ensure the following keys exist (the values below reflect current defaults in code):
 
 ```env
-# OpenAI Configuration
-OPENAI_API_KEY=your_openai_api_key_here
-
-# Google Gemini Configuration  
+# Google Gemini (used for generation)
 GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
+GEMINI_MODEL=gemini-2.0-flash
 
-# Default LLM Provider (openai or gemini)
-DEFAULT_LLM_PROVIDER=openai
-
-# Default Model
-DEFAULT_MODEL=gpt-3.5-turbo
+# OpenRouter (used for evaluation)
+OPEN_ROUTER_API_KEY=your_openrouter_api_key_here
+OPEN_ROUTER_BASE_URL=https://openrouter.ai/api/v1
 ```
 
-## 🎯 Usage
+Notes:
+- You must provide at least one of `GEMINI_API_KEY` or `OPEN_ROUTER_API_KEY` for the app to start; for full functionality, set both.
+- The legacy keys in `env_example.txt` (like `OPENAI_API_KEY`) are not used by the current runtime logic. Prefer the keys shown above.
 
-### Web Interface
-
-Launch the Gradio web interface:
+### Running
 
 ```bash
-python -m chatbot
-# or
-chatbot
+# Using the console entrypoint (installed via pyproject)
+uv run chatbot
+
 ```
 
-Then open your browser to `http://localhost:7860`
+Then open your browser at `http://localhost:7860`.
 
-### Command Line Example
+### How it works (high level)
 
-Run the simple command-line example:
+- `ChatService.chat(...)` builds a system prompt from your local `bio/` data and the user’s message history, then calls Gemini to generate a reply.
+- The reply is evaluated by `EvaluatorService.evaluate(...)` using an OpenRouter-hosted model. If rejected, the assistant re-prompts itself with feedback and retries once.
 
-```bash
-python example.py
+### Updating models/providers
+
+You can change defaults via environment variables without code changes:
+
+```env
+GEMINI_MODEL=gemini-2.0-flash
+OPEN_ROUTER_BASE_URL=https://openrouter.ai/api/v1
 ```
 
-### Programmatic Usage
+### Troubleshooting
 
-```python
-import asyncio
-from src.chatbot.factory import LLMFactory
-from src.chatbot.agent import ChatAgent
+- App prints: “No API keys found!”
+  - Ensure `.env` is present and contains `GEMINI_API_KEY` and/or `OPEN_ROUTER_API_KEY`.
+  - Restart the terminal or run `uv run env | grep -E "GEMINI|OPEN_ROUTER"` to verify they’re loaded.
 
-async def main():
-    # Create LLM provider
-    provider = LLMFactory.create_provider("openai", "your-api-key")
-    
-    # Create agent
-    agent = ChatAgent(provider, "You are a helpful assistant.")
-    
-    # Chat
-    response = await agent.chat("Hello, how are you?")
-    print(response)
+- Gradio launches but responses fail
+  - Check the API key scopes and remaining quota.
+  - Confirm the base URLs match your provider settings.
 
-asyncio.run(main())
-```
+- PDF parsing issues
+  - Verify `bio/Profile.pdf` exists and is a readable PDF.
+  - Ensure `bio/self_intro.txt` exists and contains UTF-8 text.
 
-## 🧩 Architecture
-
-This project follows **SOLID principles** and clean architecture:
-
-### Single Responsibility Principle (SRP)
-- Each class has one clear responsibility
-- `LLMProvider` only handles LLM communication
-- `ChatAgent` only manages conversation flow
-- `ChatInterface` only handles UI
-
-### Open/Closed Principle (OCP)
-- Easy to add new LLM providers by extending `LLMProvider`
-- New agent types can be created by extending `ChatAgent`
-
-### Liskov Substitution Principle (LSP)
-- All LLM providers can be used interchangeably
-- Factory pattern ensures consistent interfaces
-
-### Interface Segregation Principle (ISP)
-- Clean, minimal interfaces for each component
-- No forced dependencies on unused methods
-
-### Dependency Inversion Principle (DIP)
-- High-level modules depend on abstractions
-- `ChatAgent` depends on `LLMProvider` interface, not concrete implementations
-
-## 🔌 Adding New LLM Providers
-
-1. Create a new provider class:
-
-```python
-from .base import LLMProvider, ChatMessage
-
-class CustomProvider(LLMProvider):
-    async def generate_response(self, messages: List[ChatMessage]) -> str:
-        # Implement your provider logic
-        pass
-```
-
-2. Register in the factory:
-
-```python
-# In factory.py
-elif provider_type == "custom":
-    return CustomProvider(api_key, model)
-```
-
-## 🧪 Testing
-
-Run tests:
-
-```bash
-pytest
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## 📄 License
+### License
 
 MIT License
-

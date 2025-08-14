@@ -13,6 +13,7 @@ def chat(message, history):
     # Prompt Section 
     system_prompt = prompt.getSystemPrompt(self_intro_summary, extracted_resume_content)
 
+    # trying random to check evaluator is working properly or no
     if "hello" in message:
         system = system_prompt + "\n\n Everything in your reply should strictly to be in pig latin \
             it is mandatory that you respond only  and entirely in pig latin"

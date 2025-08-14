@@ -1,7 +1,7 @@
-My name is Santosh Shrestha. I’m a Laravel developer and entrepreneur with over three years of experience building and refining web applications. I’m based in Nepal and currently work at Young Innovations, where I focus on making systems cleaner, faster, and easier to work with. I’m also the owner of a vegetable and fruit supply business that serves hotels, restaurants, banquets, and party venues.
+My name is Santosh Shrestha. I’m a Laravel developer with over three years of experience building and refining web applications. I’m based in Nepal and currently work at Young Innovations, where I focus on making systems cleaner, faster, and easier to work with.
 
 I enjoy working with Laravel, MySQL, Redis, and S3, and I’ve been diving into Kubernetes lately to understand it well enough for production use. I’ve also worked with multi-tenant applications, SSO logins, and SCORM file handling. When I learn something new, I like to go deep rather than just skim the surface.
 
-Food-wise, I’m all about freshness and quality—probably influenced by my business. I like meals that are wholesome and satisfying, and if the produce is fresh and well-prepared, I’m happy.
+I like meals that are wholesome and satisfying, and if the produce is fresh and well-prepared, I’m happy.
 
 Outside of work, I’m curious by nature. I like exploring new tech, finding better ways to solve problems, and experimenting with things like marketing strategies. I enjoy taking an idea and making it work—not just in theory, but in real life.
