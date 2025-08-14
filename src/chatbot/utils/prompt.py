@@ -24,3 +24,11 @@ def getEvaluatorSystemPrompt(self_intro_summary, resume_content, full_name= "San
     evaluator_system_prompt += f"With this context, please evaluate the latest response, replying with whether the response is acceptable and your feedback."
 
     return evaluator_system_prompt
+
+def evaluator_user_prompt(reply, message, history):
+    user_prompt = f"Here's the conversation between the User and the Agent: \n\n{history}\n\n"
+    user_prompt += f"Here's the latest message from the User: \n\n{message}\n\n"
+    user_prompt += f"Here's the latest response from the Agent: \n\n{reply}\n\n"
+    user_prompt += "Please evaluate the response, replying with whether it is acceptable and your feedback."
+
+    return user_prompt
